@@ -376,6 +376,9 @@
                 } else if (score2 > score1 && score2 > 0) {
                     teams[1].classList.add('winner');
                     advanceWinner(match, 1);
+                } else if (score1 === score2 && score1 > 0) {
+                    // 处理平局情况 - 不晋级任何队伍，等待用户修改分数
+                    console.log('Tied score detected - no advancement');
                 }
             });
         });
@@ -411,7 +414,7 @@
 
         // 重置赛程
         function resetTournament() {
-            if (confirm('确定要重置所有赛程数据吗？')) {
+            if (confirm('确定要重置所有赛程数据吗？\nAre you sure you want to reset all tournament data?')) {
                 // 重置四分之一决赛
                 const qfTeams = ['队伍 1', '队伍 2', '队伍 3', '队伍 4', '队伍 5', '队伍 6', '队伍 7', '队伍 8'];
                 document.querySelectorAll('[data-match^="qf"]').forEach((match, index) => {
@@ -479,26 +482,38 @@
 
         // 从 localStorage 加载数据
         function loadFromLocalStorage() {
-            const savedData = localStorage.getItem('tournamentData');
-            if (savedData) {
-                const data = JSON.parse(savedData);
-                
-                const teamNames = document.querySelectorAll('.team-name');
-                const scoreInputs = document.querySelectorAll('.score');
-                
-                data.teams.forEach((teamName, index) => {
-                    if (teamNames[index]) {
-                        teamNames[index].textContent = teamName;
+            try {
+                const savedData = localStorage.getItem('tournamentData');
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    
+                    // 验证数据结构
+                    if (!data.teams || !data.scores || !Array.isArray(data.teams) || !Array.isArray(data.scores)) {
+                        console.warn('Invalid data format in localStorage, skipping load');
+                        return;
                     }
-                });
-                
-                data.scores.forEach((scoreValue, index) => {
-                    if (scoreInputs[index]) {
-                        scoreInputs[index].value = scoreValue;
-                        // 触发 input 事件以更新获胜者高亮
-                        scoreInputs[index].dispatchEvent(new Event('input'));
-                    }
-                });
+                    
+                    const teamNames = document.querySelectorAll('.team-name');
+                    const scoreInputs = document.querySelectorAll('.score');
+                    
+                    data.teams.forEach((teamName, index) => {
+                        if (teamNames[index]) {
+                            teamNames[index].textContent = teamName;
+                        }
+                    });
+                    
+                    data.scores.forEach((scoreValue, index) => {
+                        if (scoreInputs[index]) {
+                            scoreInputs[index].value = scoreValue;
+                            // 触发 input 事件以更新获胜者高亮
+                            scoreInputs[index].dispatchEvent(new Event('input'));
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading tournament data from localStorage:', error);
+                // 清除损坏的数据
+                localStorage.removeItem('tournamentData');
             }
         }
 
