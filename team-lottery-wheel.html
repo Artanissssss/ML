@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>电子竞技队伍抽签转盘 - Esports Team Lottery Wheel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.2em;
+            color: #333;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .team-input-area {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        #teamInput {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        #teamInput:focus {
+            border-color: #764ba2;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .btn-add {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-add:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-spin {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+        }
+
+        .btn-spin:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 87, 108, 0.4);
+        }
+
+        .btn-spin:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-clear {
+            background: #ff6b6b;
+            color: white;
+            margin-top: 10px;
+        }
+
+        .btn-clear:hover {
+            background: #ee5a52;
+            transform: translateY(-2px);
+        }
+
+        .teams-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .team-tag {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .team-tag .remove-btn {
+            background: rgba(255, 255, 255, 0.3);
+            border: none;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+        }
+
+        .team-tag .remove-btn:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .wheel-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 30px 0;
+            position: relative;
+        }
+
+        .wheel {
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            border: 10px solid #667eea;
+            position: relative;
+            transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+            box-shadow: 0 0 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .wheel-segment {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            left: 50%;
+            top: 50%;
+            transform-origin: 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding-left: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .pointer {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 40px solid #f5576c;
+            z-index: 10;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
+        }
+
+        .center-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 50%;
+            border: 5px solid #667eea;
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .result-section {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 20px;
+            border-radius: 12px;
+            color: white;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .result-text {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 30px;
+            font-style: italic;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .spinning .center-circle {
+            animation: pulse 0.5s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 电子竞技队伍抽签转盘</h1>
+        <p class="subtitle">Esports Team Lottery Wheel</p>
+
+        <div class="section">
+            <div class="section-title">📝 添加队伍 / Add Teams</div>
+            <div class="team-input-area">
+                <input 
+                    type="text" 
+                    id="teamInput" 
+                    placeholder="输入队伍名称 / Enter team name..."
+                    onkeypress="if(event.key==='Enter') addTeam()"
+                >
+                <button class="btn btn-add" onclick="addTeam()">➕ 添加</button>
+            </div>
+            <div id="teamsList" class="teams-list"></div>
+            <button class="btn btn-clear" onclick="clearAllTeams()" style="width: 100%;">🗑️ 清空所有队伍</button>
+        </div>
+
+        <div class="section">
+            <div class="section-title">🎯 转盘 / Lottery Wheel</div>
+            <div class="wheel-container">
+                <div class="pointer"></div>
+                <div class="wheel" id="wheel">
+                    <div class="center-circle">🎲</div>
+                </div>
+            </div>
+            <button class="btn btn-spin" id="spinBtn" onclick="spinWheel()" disabled>
+                🎰 开始抽签 / Spin the Wheel
+            </button>
+        </div>
+
+        <div class="result-section" id="resultSection" style="display: none;">
+            <div>🎉 抽签结果 / Result:</div>
+            <div class="result-text" id="resultText"></div>
+        </div>
+    </div>
+
+    <script>
+        let teams = [];
+        let isSpinning = false;
+
+        // Color palette for wheel segments
+        const colors = [
+            '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', 
+            '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2',
+            '#F8B739', '#52B788', '#E63946', '#06FFA5'
+        ];
+
+        function addTeam() {
+            const input = document.getElementById('teamInput');
+            const teamName = input.value.trim();
+            
+            if (!teamName) {
+                alert('请输入队伍名称 / Please enter a team name');
+                return;
+            }
+            
+            if (teams.includes(teamName)) {
+                alert('该队伍已存在 / Team already exists');
+                return;
+            }
+            
+            teams.push(teamName);
+            input.value = '';
+            updateTeamsList();
+            updateWheel();
+            updateSpinButton();
+        }
+
+        function removeTeam(index) {
+            teams.splice(index, 1);
+            updateTeamsList();
+            updateWheel();
+            updateSpinButton();
+        }
+
+        function clearAllTeams() {
+            if (teams.length === 0) return;
+            
+            if (confirm('确定要清空所有队伍吗？ / Clear all teams?')) {
+                teams = [];
+                updateTeamsList();
+                updateWheel();
+                updateSpinButton();
+                document.getElementById('resultSection').style.display = 'none';
+            }
+        }
+
+        function updateTeamsList() {
+            const listContainer = document.getElementById('teamsList');
+            
+            if (teams.length === 0) {
+                listContainer.innerHTML = '<div class="empty-state">暂无队伍，请添加 / No teams added yet</div>';
+                return;
+            }
+            
+            listContainer.innerHTML = teams.map((team, index) => `
+                <div class="team-tag">
+                    <span>${team}</span>
+                    <button class="remove-btn" onclick="removeTeam(${index})">×</button>
+                </div>
+            `).join('');
+        }
+
+        function updateWheel() {
+            const wheel = document.getElementById('wheel');
+            const centerCircle = wheel.querySelector('.center-circle');
+            
+            // Clear existing segments
+            const existingSegments = wheel.querySelectorAll('.wheel-segment');
+            existingSegments.forEach(segment => segment.remove());
+            
+            if (teams.length === 0) {
+                return;
+            }
+            
+            const segmentAngle = 360 / teams.length;
+            
+            teams.forEach((team, index) => {
+                const segment = document.createElement('div');
+                segment.className = 'wheel-segment';
+                segment.textContent = team;
+                segment.style.background = colors[index % colors.length];
+                
+                const rotation = segmentAngle * index;
+                segment.style.transform = `rotate(${rotation}deg) skewY(${-90 + segmentAngle}deg)`;
+                
+                wheel.insertBefore(segment, centerCircle);
+            });
+        }
+
+        function updateSpinButton() {
+            const spinBtn = document.getElementById('spinBtn');
+            spinBtn.disabled = teams.length < 2;
+        }
+
+        function spinWheel() {
+            if (isSpinning || teams.length < 2) return;
+            
+            isSpinning = true;
+            const wheel = document.getElementById('wheel');
+            const spinBtn = document.getElementById('spinBtn');
+            
+            spinBtn.disabled = true;
+            wheel.classList.add('spinning');
+            
+            // Reset rotation
+            wheel.style.transition = 'none';
+            wheel.style.transform = 'rotate(0deg)';
+            
+            setTimeout(() => {
+                wheel.style.transition = 'transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99)';
+                
+                // Random spins (5-8 full rotations) plus random angle
+                const spins = 5 + Math.floor(Math.random() * 3);
+                const randomAngle = Math.random() * 360;
+                const totalRotation = spins * 360 + randomAngle;
+                
+                wheel.style.transform = `rotate(${totalRotation}deg)`;
+                
+                setTimeout(() => {
+                    wheel.classList.remove('spinning');
+                    
+                    // Calculate which team was selected
+                    const segmentAngle = 360 / teams.length;
+                    const normalizedAngle = (360 - (totalRotation % 360)) % 360;
+                    const selectedIndex = Math.floor(normalizedAngle / segmentAngle);
+                    const selectedTeam = teams[selectedIndex];
+                    
+                    // Show result
+                    document.getElementById('resultText').textContent = selectedTeam;
+                    document.getElementById('resultSection').style.display = 'block';
+                    
+                    spinBtn.disabled = false;
+                    isSpinning = false;
+                }, 4000);
+            }, 50);
+        }
+
+        // Initialize with some sample teams
+        const sampleTeams = ['Team A', 'Team B', 'Team C', 'Team D'];
+        teams = [...sampleTeams];
+        updateTeamsList();
+        updateWheel();
+        updateSpinButton();
+    </script>
+</body>
+</html>
