@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>电竞8强淘汰赛晋级图 - E-Sports Tournament Bracket</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1400px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .tournament {
+            display: flex;
+            justify-content: space-between;
+            gap: 40px;
+            overflow-x: auto;
+            padding: 20px 0;
+        }
+
+        .round {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            min-width: 250px;
+        }
+
+        .round-title {
+            text-align: center;
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #4a5568;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .match {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            margin: 15px 0;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .match:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            border-color: #667eea;
+        }
+
+        .team {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #e2e8f0;
+            transition: background-color 0.3s ease;
+        }
+
+        .team:last-child {
+            border-bottom: none;
+        }
+
+        .team:hover {
+            background-color: #f7fafc;
+        }
+
+        .team.winner {
+            background-color: #c6f6d5;
+            font-weight: bold;
+        }
+
+        .team-name {
+            flex: 1;
+            font-size: 1.1em;
+            color: #2d3748;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: all 0.2s ease;
+        }
+
+        .team-name:hover {
+            background-color: #edf2f7;
+        }
+
+        .team-name:focus {
+            outline: 2px solid #667eea;
+            background-color: white;
+        }
+
+        .score {
+            width: 40px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #4a5568;
+            padding: 5px;
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+            margin-left: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .score:focus {
+            outline: 2px solid #667eea;
+            border-color: #667eea;
+        }
+
+        .champion {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .champion-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #742a2a;
+            margin-bottom: 15px;
+        }
+
+        .champion-name {
+            font-size: 2em;
+            font-weight: bold;
+            color: #7c2d12;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .controls {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1em;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .instructions {
+            background: #edf2f7;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .instructions h3 {
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .instructions ul {
+            color: #4a5568;
+            margin-left: 20px;
+        }
+
+        .instructions li {
+            margin: 5px 0;
+        }
+
+        @media (max-width: 1200px) {
+            .tournament {
+                flex-direction: column;
+            }
+            
+            .round {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏆 电竞8强淘汰赛晋级图 🏆</h1>
+        <p class="subtitle">E-Sports 8-Team Knockout Tournament Bracket</p>
+        
+        <div class="instructions">
+            <h3>📋 使用说明：</h3>
+            <ul>
+                <li>点击队伍名称可以编辑队名</li>
+                <li>点击分数框可以输入比分</li>
+                <li>点击"重置赛程"按钮可以清空所有数据</li>
+                <li>自动高亮获胜队伍（绿色背景）</li>
+            </ul>
+        </div>
+
+        <div class="tournament">
+            <!-- 四分之一决赛 (Quarterfinals) -->
+            <div class="round">
+                <div class="round-title">四分之一决赛<br>Quarterfinals</div>
+                
+                <div class="match" data-match="qf1">
+                    <div class="team">
+                        <span class="team-name" contenteditable="true">队伍 1</span>
+                        <input type="number" class="score" min="0" placeholder="0">
+                    </div>
+                    <div class="team">
+                        <span class="team-name" contenteditable="true">队伍 2</span>
+                        <input type="number" class="score" min="0" placeholder="0">
+                    </div>
+                </div>
+
+                <div class="match" data-match="qf2">
+                    <div class="team">
+                        <span class="team-name" contenteditable="true">队伍 3</span>
+                        <input type="number" class="score" min="0" placeholder="0">
+                    </div>
+                    <div class="team">
+                        <span class="team-name" contenteditable="true">队伍 4</span>
+                        <input type="number" class="score" min="0" placeholder="0">
+                    </div>
+                </div>
+
+                <div class="match" data-match="qf3">
+                    <div class="team">
+                        <span class="team-name" contenteditable="true">队伍 5</span>
+                        <input type="number" class="score" min="0" placeholder="0">
+                    </div>
+                    <div class="team">
+                        <span class="team-name" contenteditable="true">队伍 6</span>
+                        <input type="number" class="score" min="0" placeholder="0">
+                    </div>
+                </div>
+
+                <div class="match" data-match="qf4">
+                    <div class="team">
+                        <span class="team-name" contenteditable="true">队伍 7</span>
+                        <input type="number" class="score" min="0" placeholder="0">
+                    </div>
+                    <div class="team">
+                        <span class="team-name" contenteditable="true">队伍 8</span>
+                        <input type="number" class="score" min="0" placeholder="0">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 半决赛 (Semifinals) -->
+            <div class="round">
+                <div class="round-title">半决赛<br>Semifinals</div>
+                
+                <div class="match" data-match="sf1">
+                    <div class="team">
+                        <span class="team-name" contenteditable="true">-</span>
+                        <input type="number" class="score" min="0" placeholder="0">
+                    </div>
+                    <div class="team">
+                        <span class="team-name" contenteditable="true">-</span>
+                        <input type="number" class="score" min="0" placeholder="0">
+                    </div>
+                </div>
+
+                <div class="match" data-match="sf2">
+                    <div class="team">
+                        <span class="team-name" contenteditable="true">-</span>
+                        <input type="number" class="score" min="0" placeholder="0">
+                    </div>
+                    <div class="team">
+                        <span class="team-name" contenteditable="true">-</span>
+                        <input type="number" class="score" min="0" placeholder="0">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 决赛 (Finals) -->
+            <div class="round">
+                <div class="round-title">决赛<br>Finals</div>
+                
+                <div class="match" data-match="final">
+                    <div class="team">
+                        <span class="team-name" contenteditable="true">-</span>
+                        <input type="number" class="score" min="0" placeholder="0">
+                    </div>
+                    <div class="team">
+                        <span class="team-name" contenteditable="true">-</span>
+                        <input type="number" class="score" min="0" placeholder="0">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 冠军 (Champion) -->
+            <div class="round">
+                <div class="round-title">冠军<br>Champion</div>
+                <div class="champion">
+                    <div class="champion-title">🏆 冠军队伍 🏆</div>
+                    <div class="champion-name" id="champion">-</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button onclick="resetTournament()">🔄 重置赛程</button>
+            <button onclick="printBracket()">🖨️ 打印赛程</button>
+        </div>
+    </div>
+
+    <script>
+        // 自动更新获胜者
+        document.querySelectorAll('.score').forEach(scoreInput => {
+            scoreInput.addEventListener('input', function() {
+                const match = this.closest('.match');
+                const teams = match.querySelectorAll('.team');
+                const scores = match.querySelectorAll('.score');
+                
+                // 移除所有 winner 类
+                teams.forEach(team => team.classList.remove('winner'));
+                
+                // 如果有分数，高亮获胜者
+                const score1 = parseInt(scores[0].value) || 0;
+                const score2 = parseInt(scores[1].value) || 0;
+                
+                if (score1 > score2 && score1 > 0) {
+                    teams[0].classList.add('winner');
+                    advanceWinner(match, 0);
+                } else if (score2 > score1 && score2 > 0) {
+                    teams[1].classList.add('winner');
+                    advanceWinner(match, 1);
+                }
+            });
+        });
+
+        // 晋级获胜者到下一轮
+        function advanceWinner(match, winnerIndex) {
+            const matchId = match.dataset.match;
+            const winnerName = match.querySelectorAll('.team-name')[winnerIndex].textContent;
+            
+            // 四分之一决赛晋级到半决赛
+            if (matchId === 'qf1') {
+                document.querySelector('[data-match="sf1"]').querySelectorAll('.team-name')[0].textContent = winnerName;
+            } else if (matchId === 'qf2') {
+                document.querySelector('[data-match="sf1"]').querySelectorAll('.team-name')[1].textContent = winnerName;
+            } else if (matchId === 'qf3') {
+                document.querySelector('[data-match="sf2"]').querySelectorAll('.team-name')[0].textContent = winnerName;
+            } else if (matchId === 'qf4') {
+                document.querySelector('[data-match="sf2"]').querySelectorAll('.team-name')[1].textContent = winnerName;
+            }
+            
+            // 半决赛晋级到决赛
+            else if (matchId === 'sf1') {
+                document.querySelector('[data-match="final"]').querySelectorAll('.team-name')[0].textContent = winnerName;
+            } else if (matchId === 'sf2') {
+                document.querySelector('[data-match="final"]').querySelectorAll('.team-name')[1].textContent = winnerName;
+            }
+            
+            // 决赛晋级到冠军
+            else if (matchId === 'final') {
+                document.getElementById('champion').textContent = winnerName;
+            }
+        }
+
+        // 重置赛程
+        function resetTournament() {
+            if (confirm('确定要重置所有赛程数据吗？')) {
+                // 重置四分之一决赛
+                const qfTeams = ['队伍 1', '队伍 2', '队伍 3', '队伍 4', '队伍 5', '队伍 6', '队伍 7', '队伍 8'];
+                document.querySelectorAll('[data-match^="qf"]').forEach((match, index) => {
+                    const teams = match.querySelectorAll('.team-name');
+                    teams[0].textContent = qfTeams[index * 2];
+                    teams[1].textContent = qfTeams[index * 2 + 1];
+                });
+                
+                // 重置半决赛、决赛
+                document.querySelectorAll('[data-match^="sf"] .team-name, [data-match="final"] .team-name').forEach(name => {
+                    name.textContent = '-';
+                });
+                
+                // 重置所有分数
+                document.querySelectorAll('.score').forEach(score => {
+                    score.value = '';
+                });
+                
+                // 移除所有 winner 类
+                document.querySelectorAll('.team').forEach(team => {
+                    team.classList.remove('winner');
+                });
+                
+                // 重置冠军
+                document.getElementById('champion').textContent = '-';
+            }
+        }
+
+        // 打印赛程
+        function printBracket() {
+            window.print();
+        }
+
+        // 保存队伍名称到 localStorage
+        document.querySelectorAll('.team-name').forEach(teamName => {
+            teamName.addEventListener('blur', function() {
+                saveToLocalStorage();
+            });
+        });
+
+        // 保存分数到 localStorage
+        document.querySelectorAll('.score').forEach(scoreInput => {
+            scoreInput.addEventListener('change', function() {
+                saveToLocalStorage();
+            });
+        });
+
+        // 保存数据到 localStorage
+        function saveToLocalStorage() {
+            const data = {
+                teams: [],
+                scores: []
+            };
+            
+            document.querySelectorAll('.team-name').forEach(team => {
+                data.teams.push(team.textContent);
+            });
+            
+            document.querySelectorAll('.score').forEach(score => {
+                data.scores.push(score.value);
+            });
+            
+            localStorage.setItem('tournamentData', JSON.stringify(data));
+        }
+
+        // 从 localStorage 加载数据
+        function loadFromLocalStorage() {
+            const savedData = localStorage.getItem('tournamentData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                
+                const teamNames = document.querySelectorAll('.team-name');
+                const scoreInputs = document.querySelectorAll('.score');
+                
+                data.teams.forEach((teamName, index) => {
+                    if (teamNames[index]) {
+                        teamNames[index].textContent = teamName;
+                    }
+                });
+                
+                data.scores.forEach((scoreValue, index) => {
+                    if (scoreInputs[index]) {
+                        scoreInputs[index].value = scoreValue;
+                        // 触发 input 事件以更新获胜者高亮
+                        scoreInputs[index].dispatchEvent(new Event('input'));
+                    }
+                });
+            }
+        }
+
+        // 页面加载时恢复数据
+        window.addEventListener('load', loadFromLocalStorage);
+    </script>
+</body>
+</html>
